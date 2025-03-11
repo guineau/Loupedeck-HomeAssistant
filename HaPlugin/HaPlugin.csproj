@@ -19,7 +19,7 @@
     <PluginDir Condition="$(OS) != 'Windows_NT'">~/Library/Application\ Support/Logi/LogiPluginService/Plugins/</PluginDir>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="$(OS) == 'Windows_NT'">
     <None Remove="Resources\light_off.png" />
     <None Remove="Resources\light_on.png" />
     <None Remove="Resources\lock_locked.png" />
@@ -27,14 +27,30 @@
     <None Remove="Resources\switch_off.png" />
     <None Remove="Resources\switch_on.png" />
   </ItemGroup>
+  <ItemGroup Condition="$(OS) != 'Windows_NT'">
+    <None Remove="Resources/light_off.png" />
+    <None Remove="Resources/light_on.png" />
+    <None Remove="Resources/lock_locked.png" />
+    <None Remove="Resources/lock_unlocked.png" />
+    <None Remove="Resources/switch_off.png" />
+    <None Remove="Resources/switch_on.png" />
+  </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="$(OS) == 'Windows_NT'">
     <EmbeddedResource Include="Resources\light_off.png" />
     <EmbeddedResource Include="Resources\light_on.png" />
     <EmbeddedResource Include="Resources\lock_locked.png" />
     <EmbeddedResource Include="Resources\lock_unlocked.png" />
     <EmbeddedResource Include="Resources\switch_off.png" />
     <EmbeddedResource Include="Resources\switch_on.png" />
+  </ItemGroup>
+  <ItemGroup Condition="$(OS) != 'Windows_NT'">
+    <EmbeddedResource Include="Resources/light_off.png" />
+    <EmbeddedResource Include="Resources/light_on.png" />
+    <EmbeddedResource Include="Resources/lock_locked.png" />
+    <EmbeddedResource Include="Resources/lock_unlocked.png" />
+    <EmbeddedResource Include="Resources/switch_off.png" />
+    <EmbeddedResource Include="Resources/switch_on.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,25 +65,29 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <!-- <Exec Condition="$(OS) == 'Windows_NT'" Command="echo $(OutputPath) &gt; &quot;$(PluginDir)$(ProjectName).link&quot;" /> -->
-    <!-- <Exec Condition="$(OS) != 'Windows_NT'" Command="echo $(OutputPath) &gt; $(PluginDir)$(ProjectName).link" /> -->
+    <Exec Condition="$(OS) == 'Windows_NT'" Command="echo $(OutputPath) &gt; &quot;$(PluginDir)$(ProjectName).link&quot;" />
+    <Exec Condition="$(OS) != 'Windows_NT'" Command="echo $(OutputPath) &gt; $(PluginDir)$(ProjectName).link" />
     
     <RemoveDir Directories="$(OutputPath)win" />
     <MakeDir Directories="$(OutputPath)win" />
     <ItemGroup>
-      <FilesToMove Include="$(OutputPath)\*.dll" />
-      <FilesToMove Include="$(OutputPath)\HaPlugin.deps.json" />
-      <FilesToMove Include="$(OutputPath)\HaPlugin.pdb" />
-      <FilesToMove Include="$(OutputPath)\PluginApi.xml" />
+      <FilesToMove Include="$(OutputPath)*.dll" />
+      <FilesToMove Include="$(OutputPath)HaPlugin.deps.json" />
+      <FilesToMove Include="$(OutputPath)HaPlugin.pdb" />
+      <FilesToMove Condition="$(OS) == 'Windows_NT'" Include="$(OutputPath)\PluginApi.xml" />
     </ItemGroup>
-    <Move SourceFiles="@(FilesToMove)" DestinationFolder="$(OutputPath)\win" />
+    <Move Condition="$(OS) == 'Windows_NT'" SourceFiles="@(FilesToMove)" DestinationFolder="$(OutputPath)win" />
+    <Move Condition="$(OS) != 'Windows_NT'" SourceFiles="@(FilesToMove)" DestinationFolder="$(OutputPath)mac" />
   </Target>
 
   <Target Name="CopyMetadata" AfterTargets="PostBuildEvent">
-    <ItemGroup>
+    <ItemGroup Condition="$(OS) == 'Windows_NT'">
       <MetadataFiles Include="metadata\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(MetadataFiles)" DestinationFolder="$(OutputPath)\metadata" />
+    <ItemGroup Condition="$(OS) != 'Windows_NT'">
+      <MetadataFiles Include="metadata/*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(MetadataFiles)" DestinationFolder="$(OutputPath)metadata" />
   </Target>
 
   <Target Name="PluginClean" AfterTargets="CoreClean">
@@ -76,6 +96,7 @@
 
     <RemoveDir Directories="$(OutputPath)metadata" />
     <RemoveDir Directories="$(OutputPath)win" />
+    <RemoveDir Directories="$(OutputPath)mac" />
   </Target>
 
 </Project>

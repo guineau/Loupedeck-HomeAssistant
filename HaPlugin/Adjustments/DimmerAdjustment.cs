@@ -70,9 +70,9 @@
             { return null; }
 
             var entityState = this.plugin.States[actionParameter];
-            Int32.TryParse(entityState?.Attributes["brightness"]?.ToString(), out var entityValue);
+            Single.TryParse(entityState?.Attributes["brightness"]?.ToString(), out var entityValue);
 
-            return entityValue.ToString();
+            return ((Int32)entityValue).ToString();
         }
 
         protected override void ApplyAdjustment(String entity_id, Int32 value)
@@ -81,10 +81,13 @@
             { return; }
 
             var entityState = this.plugin.States[entity_id];
-            Int32.TryParse(entityState.Attributes["brightness"]?.ToString(), out var entityValue);
-            var brightness = entityValue + value;
+            Single.TryParse(entityState.Attributes["brightness"]?.ToString(), out var entityValue);
+            var brightness = (Int32)entityValue + value;
+            if( brightness < 0 ) {
+                brightness = 0;
+            }
 
-            PluginLog.Verbose($"{entity_id} {entityValue} => {brightness}");
+            PluginLog.Verbose($"entity_id {entityValue} => {brightness}");
 
             this.plugin.States[entity_id].Attributes["brightness"] = brightness.ToString();
 
